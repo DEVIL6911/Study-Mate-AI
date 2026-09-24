@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Make AI — Your AI Study Companion</title>
+  <meta name="description" content="Study Make AI is an AI-powered study companion for college students. Get explanations, quizzes, revision plans, and code help instantly." />
+  <link rel="icon" type="image/png" href="GDG LOGO.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=3" />
+</head>
+<body>
+  <!-- ─── Sidebar ─── -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-top">
+      <button class="sidebar-icon active" title="Home" aria-label="Home">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <button id="about-gdg-btn" class="sidebar-icon" title="About GDG" aria-label="About GDG">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ─── Main Area ─── -->
+  <main id="main" class="main">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="sidebar-toggle" class="topbar-toggle" title="Toggle sidebar" aria-label="Toggle sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="app-name">Study Make AI</span>
+      </div>
+      <div class="topbar-right">
+        <button id="topbar-api-btn" class="btn-outline" title="Set Gemini API Key">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          <span>API Key</span>
+        </button>
+        <button id="clear-history-btn" class="btn-outline" title="Clear chat history">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>Clear</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Chat container -->
+    <div id="chat-container" class="chat-container">
+      <!-- ─── Empty State ─── -->
+      <div id="empty-state" class="empty-state">
+        <!-- Gradient Orb -->
+        <div class="orb-wrapper">
+          <div class="orb"></div>
+          <div class="orb-glow"></div>
+        </div>
+
+        <h1 class="greeting">
+          Hey there, what are we<br />
+          <span class="gradient-text">studying today?</span>
+        </h1>
+
+        <p class="subtitle">Your AI study companion — ask anything, anytime.</p>
+
+        <!-- Example Prompt Cards -->
+        <div class="prompt-cards">
+          <button class="prompt-card" data-prompt="Explain recursion simply, like I'm five" data-mode="explain">
+            <div class="prompt-card-icon explain-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <span>Explain recursion simply</span>
+            <span class="prompt-tag">CS 101</span>
+          </button>
+          <button class="prompt-card" data-prompt="Quiz me on photosynthesis — give me 5 MCQs" data-mode="quiz">
+            <div class="prompt-card-icon quiz-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <span>Quiz me on photosynthesis</span>
+            <span class="prompt-tag">Bio 105</span>
+          </button>
+          <button class="prompt-card" data-prompt="Make a 7-day revision plan for my upcoming calculus exam" data-mode="revision">
+            <div class="prompt-card-icon revision-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <span>Make a revision plan for my exam</span>
+            <span class="prompt-tag">Study Prep</span>
+          </button>
+          <button class="prompt-card" data-prompt="Explain this code snippet in beginner-friendly terms:\n\nfunction fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}" data-mode="code">
+            <div class="prompt-card-icon code-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <span>Explain this code snippet</span>
+            <span class="prompt-tag">Code</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ─── Chat Messages Area ─── -->
+      <div id="messages" class="messages"></div>
+    </div>
+
+    <!-- ─── Input Area ─── -->
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea
+          id="user-input"
+          class="chat-input"
+          placeholder="Ask Study Make AI a question..."
+          rows="1"
+          aria-label="Type your question"
+        ></textarea>
+        <div class="input-actions">
+          <div class="input-actions-left">
+            <div class="mode-selector">
+              <button id="mode-btn" class="action-btn" title="Select mode">
+                <span class="mode-dot"></span>
+                <span id="mode-label">Explain</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div id="mode-dropdown" class="mode-dropdown">
+                <button class="mode-option active" data-mode="explain">
+                  <span class="mode-option-dot explain-dot"></span>
+                  <div>
+                    <strong>Explain</strong>
+                    <small>Break down topics simply</small>
+                  </div>
+                </button>
+                <button class="mode-option" data-mode="quiz">
+                  <span class="mode-option-dot quiz-dot"></span>
+                  <div>
+                    <strong>Quiz Me</strong>
+                    <small>Generate MCQs on any topic</small>
+                  </div>
+                </button>
+                <button class="mode-option" data-mode="revision">
+                  <span class="mode-option-dot revision-dot"></span>
+                  <div>
+                    <strong>Revision Plan</strong>
+                    <small>Build a study schedule</small>
+                  </div>
+                </button>
+                <button class="mode-option" data-mode="code">
+                  <span class="mode-option-dot code-dot"></span>
+                  <div>
+                    <strong>Code Help</strong>
+                    <small>Explain code beginner-friendly</small>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+          <button id="send-btn" class="send-btn" title="Send message" aria-label="Send message" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <p class="disclaimer">
+        <span>Powered by <strong>GDG On Campus MITS-DU</strong> &amp; Gemini AI</span>
+      </p>
+    </div>
+  </main>
+
+  <!-- ─── Settings Modal ─── -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button id="close-settings" class="modal-close" aria-label="Close settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <label class="setting-label" for="api-key-input" style="margin-bottom: 0;">Gemini API Key</label>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="font-size: 0.78rem; color: var(--accent-purple); font-weight: 600; text-decoration: none;">Get Free Key &rarr;</a>
+        </div>
+        <input type="text" id="api-key-input" class="setting-input" placeholder="AQ... or AIzaSy..." autocomplete="off" spellcheck="false" />
+        <small id="key-validation-hint" class="setting-hint">Paste your Google Gemini API key here. Stored locally in your browser.</small>
+        <label class="setting-label" for="user-name-input" style="margin-top: 20px;">Your Name</label>
+        <input type="text" id="user-name-input" class="setting-input" placeholder="e.g. Jason" />
+        <div class="modal-actions">
+          <button id="save-settings" class="btn-primary">Save Settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── About GDG Modal ─── -->
+  <div id="about-gdg-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>About GDG On Campus</h2>
+        <button id="close-about-gdg" class="modal-close" aria-label="Close about">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="gdg-modal-logo-wrapper">
+          <img src="GDG LOGO.png" alt="Google Developer Groups On Campus MITS-DU Gwalior" class="gdg-modal-logo" />
+        </div>
+        <p class="gdg-desc"><strong>Google Developer Groups On Campus (GDG) &bull; MITS-DU Gwalior</strong> is a student community powered by Google Developers. We help students learn, connect, and grow through hands-on workshops, hackathons, and study jams exploring Google technologies, AI/ML, Cloud, and Web development.</p>
+        <p class="gdg-desc">This <strong>Study Make AI</strong> platform was built by GDG On Campus MITS-DU to empower college students with instant personalized tutoring, exam preparation, and coding assistance powered by Gemini.</p>
+        <div class="gdg-social-section">
+          <span class="gdg-social-heading">Connect with Us:</span>
+          <div class="gdg-social-chips">
+            <a href="https://www.instagram.com/gdg.mits?stkn=MWNza3dxN3AxZno0bw==" target="_blank" rel="noopener noreferrer" class="social-chip insta-chip" title="Follow on Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              <span>Instagram</span>
+            </a>
+            <a href="https://www.linkedin.com/company/gdg-on-campus-mits-gwalior/" target="_blank" rel="noopener noreferrer" class="social-chip linkedin-chip" title="Connect on LinkedIn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              <span>LinkedIn</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- sql.js via CDN (SQLite compiled to WASM — runs entirely in the browser) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
