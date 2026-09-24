@@ -64,6 +64,10 @@ const emptyState = $('#empty-state');
 const messagesEl = $('#messages');
 const chatInput = $('#user-input');
 const sendBtn = $('#send-btn');
+const uploadBtn = $('#upload-btn');
+const speakBtn = $('#speak-btn');
+const fileInput = $('#file-input');
+const attachmentBar = $('#attachment-bar');
 const aboutGdgBtn = $('#about-gdg-btn');
 const aboutGdgModal = $('#about-gdg-modal');
 const closeAboutGdg = $('#close-about-gdg');
@@ -78,6 +82,8 @@ const saveSettings = $('#save-settings');
 const apiKeyInput = $('#api-key-input');
 const userNameInput = $('#user-name-input');
 const topbarApiBtn = $('#topbar-api-btn');
+
+let selectedFiles = [];
 
 // ─── Helpers ────────────────────────────────────────────────────────
 function getApiKey() {
@@ -231,6 +237,90 @@ function showEmptyState() {
   updateGreeting();
 }
 
+function getMimeTypeFromName(fileName) {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  const mimeMap = {
+    pdf: 'application/pdf',
+    txt: 'text/plain',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    webp: 'image/webp',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  };
+
+  return mimeMap[ext] || 'application/octet-stream';
+}
+
+function renderAttachmentChips() {
+  if (!attachmentBar) return;
+
+  if (!selectedFiles.length) {
+    attachmentBar.innerHTML = '';
+    return;
+  }
+
+  attachmentBar.innerHTML = selectedFiles.map((file, index) => `
+    <div class="attachment-chip">
+      <span>${escapeHTML(file.name)}</span>
+      <button class="attachment-chip-remove" type="button" data-index="${index}" aria-label="Remove ${escapeHTML(file.name)}">×</button>
+    </div>
+  `).join('');
+
+  attachmentBar.querySelectorAll('.attachment-chip-remove').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      const index = Number(event.currentTarget.dataset.index);
+      selectedFiles.splice(index, 1);
+      renderAttachmentChips();
+      updateSendButton();
+    });
+  });
+}
+
+function validateSelectedFiles(fileList) {
+  const incoming = Array.from(fileList || []);
+  if (!incoming.length) return [];
+
+  const total = selectedFiles.length + incoming.length;
+  if (total > 3) {
+    alert('You can upload up to 3 files in one question.');
+    return [];
+  }
+
+  const oversized = incoming.filter((file) => (file.size / 1024 / 1024) > 5);
+  if (oversized.length) {
+    alert('Each file must be 5MB or smaller.');
+    return [];
+  }
+
+  return incoming;
+}
+
+function updateSendButton() {
+  if (!sendBtn) return;
+  sendBtn.disabled = (chatInput.value.trim().length === 0 && selectedFiles.length === 0) || isStreaming;
+}
+
+function speakText(text) {
+  if (!('speechSynthesis' in window)) {
+    alert('Text-to-speech is not supported in this browser.');
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(
+    text
+      .replace(/[#*`_]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
+  utterance.lang = 'en-US';
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  window.speechSynthesis.speak(utterance);
+}
+
 function scrollToBottom() {
   const container = $('#chat-container');
   container.scrollTop = container.scrollHeight;
@@ -253,7 +343,7 @@ function appendMessage(role, content, animate = true) {
   if (role === 'assistant') {
     bubble.innerHTML = renderMarkdown(content);
   } else {
-    bubble.innerHTML = `<p>${escapeHTML(content)}</p>`;
+    bubble.innerHTML = `<p>${escapeHTML(content).replace(/\n/g, '<br>')}</p>`;
   }
 
   wrapper.appendChild(avatar);
@@ -296,10 +386,27 @@ function removeTypingIndicator() {
   if (el) el.remove();
 }
 
+async function fileToGeminiPart(file) {
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return {
+    inline_data: {
+      mime_type: file.type || getMimeTypeFromName(file.name),
+      data: btoa(binary)
+    }
+  };
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // GEMINI API (streaming with SSE)
 // ═══════════════════════════════════════════════════════════════════
-async function sendToGemini(userMessage) {
+async function sendToGemini(userMessage, attachedFiles = []) {
   const apiKey = getApiKey();
   if (!apiKey) {
     appendMessage('assistant', '⚠️ **No API key set.** Click **API Key** in the top bar (or Settings in the sidebar) and paste your Gemini API key to get started.');
@@ -310,8 +417,14 @@ async function sendToGemini(userMessage) {
   isStreaming = true;
   sendBtn.disabled = true;
 
+  const userParts = [{ text: userMessage }];
+
+  for (const file of attachedFiles) {
+    userParts.push(await fileToGeminiPart(file));
+  }
+
   // Build conversation context for Gemini
-  conversationHistory.push({ role: 'user', parts: [{ text: userMessage }] });
+  conversationHistory.push({ role: 'user', parts: userParts });
 
   const requestBody = {
     system_instruction: {
@@ -407,6 +520,12 @@ async function sendToGemini(userMessage) {
     bubble.innerHTML = renderMarkdown(fullResponse);
     scrollToBottom();
 
+    if (speakBtn) {
+      speakBtn.classList.add('active');
+      speakBtn.title = 'Stop speaking';
+    }
+    speakText(fullResponse);
+
     // Update conversation history for context
     conversationHistory.push({ role: 'model', parts: [{ text: fullResponse }] });
 
@@ -415,13 +534,17 @@ async function sendToGemini(userMessage) {
 
   } catch (error) {
     removeTypingIndicator();
+    if (speakBtn) {
+      speakBtn.classList.remove('active');
+      speakBtn.title = 'Listen to response';
+    }
     appendMessage('assistant', `❌ **Error:** ${escapeHTML(error.message)}\n\nPlease check your API key in Settings and try again.`);
     console.error('Gemini API error:', error);
     // Remove the failed user message from context
     conversationHistory.pop();
   } finally {
     isStreaming = false;
-    sendBtn.disabled = !chatInput.value.trim();
+    updateSendButton();
   }
 }
 
@@ -432,19 +555,68 @@ async function sendToGemini(userMessage) {
 // ─── Send Message ──────────────────────────────────────────────────
 async function handleSend() {
   const text = chatInput.value.trim();
-  if (!text || isStreaming) return;
+  const attachments = [...selectedFiles];
+
+  if ((!text && !attachments.length) || isStreaming) return;
+
+  const finalText = text || 'Please answer this question using the uploaded file(s).';
+  const attachmentSummary = attachments.length
+    ? `\n\n📎 Sent file${attachments.length > 1 ? 's' : ''}: ${attachments.map((file) => file.name).join(', ')}`
+    : '';
+  const chatText = `${finalText}${attachmentSummary}`;
 
   chatInput.value = '';
+  selectedFiles = [];
+  renderAttachmentChips();
   chatInput.style.height = 'auto';
-  sendBtn.disabled = true;
+  updateSendButton();
 
-  appendMessage('user', text);
-  saveMessage('user', text, currentMode);
+  appendMessage('user', chatText);
+  saveMessage('user', chatText, currentMode);
 
-  await sendToGemini(text);
+  await sendToGemini(finalText, attachments);
 }
 
 sendBtn.addEventListener('click', handleSend);
+
+uploadBtn.addEventListener('click', () => {
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', (event) => {
+  const validFiles = validateSelectedFiles(event.target.files);
+  if (!validFiles.length) {
+    fileInput.value = '';
+    return;
+  }
+
+  selectedFiles = [...selectedFiles, ...validFiles];
+  renderAttachmentChips();
+  updateSendButton();
+  fileInput.value = '';
+});
+
+speakBtn.addEventListener('click', () => {
+  if (speakBtn.classList.contains('active')) {
+    window.speechSynthesis.cancel();
+    speakBtn.classList.remove('active');
+    speakBtn.title = 'Listen to response';
+    return;
+  }
+
+  const latestAssistantReply = conversationHistory
+    .slice()
+    .reverse()
+    .find((entry) => entry.role === 'model')?.parts?.[0]?.text;
+
+  if (latestAssistantReply) {
+    speakBtn.classList.add('active');
+    speakBtn.title = 'Stop speaking';
+    speakText(latestAssistantReply);
+  } else {
+    alert('There is no generated response to listen to yet.');
+  }
+});
 
 chatInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -457,7 +629,7 @@ chatInput.addEventListener('keydown', (e) => {
 chatInput.addEventListener('input', () => {
   chatInput.style.height = 'auto';
   chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + 'px';
-  sendBtn.disabled = !chatInput.value.trim() || isStreaming;
+  updateSendButton();
 });
 
 // ─── Sidebar Toggle ────────────────────────────────────────────────
@@ -599,6 +771,8 @@ saveSettings.addEventListener('click', () => {
 // ═══════════════════════════════════════════════════════════════════
 async function boot() {
   updateGreeting();
+  renderAttachmentChips();
+  updateSendButton();
 
   try {
     await initDB();

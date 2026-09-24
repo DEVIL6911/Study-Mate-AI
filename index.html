@@ -103,6 +103,7 @@
     <!-- ─── Input Area ─── -->
     <div class="input-area">
       <div class="input-wrapper">
+        <div id="attachment-bar" class="attachment-bar" aria-live="polite"></div>
         <textarea
           id="user-input"
           class="chat-input"
@@ -112,6 +113,14 @@
         ></textarea>
         <div class="input-actions">
           <div class="input-actions-left">
+            <button id="upload-btn" class="action-btn upload-btn" type="button" title="Upload files" aria-label="Upload files">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+              <span>Attach</span>
+            </button>
+            <button id="speak-btn" class="action-btn speak-btn" type="button" title="Listen to response" aria-label="Listen to response">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 6a9 9 0 0 1 0 12"/></svg>
+              <span>Listen</span>
+            </button>
             <div class="mode-selector">
               <button id="mode-btn" class="action-btn" title="Select mode">
                 <span class="mode-dot"></span>
@@ -159,6 +168,7 @@
         <span>Powered by <strong>GDG On Campus MITS-DU</strong> &amp; Gemini AI</span>
       </p>
     </div>
+    <input id="file-input" type="file" accept=".pdf,image/*,.txt,.doc,.docx" multiple hidden />
   </main>
 
   <!-- ─── Settings Modal ─── -->
